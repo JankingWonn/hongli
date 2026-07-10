@@ -97,13 +97,48 @@ const holdings = [
 ];
 
 const valuationSignals = [
-  { label: "TTM 股息率", value: "5.13%", percentile: 88, note: "高于近10年 88% 时段", tone: "good" },
-  { label: "PE-TTM", value: "7.40×", percentile: 18, note: "估值处于偏低区间", tone: "good" },
-  { label: "PB", value: "0.86×", percentile: 32, note: "低于近10年 68% 时段", tone: "good" },
-  { label: "股债收益差", value: "3.69%", percentile: 91, note: "风险补偿较充足", tone: "good" },
-  { label: "当前回撤", value: "-14.8%", percentile: 72, note: "回撤深度分位 72%", tone: "watch" },
-  { label: "回调时长", value: "54日", percentile: 63, note: "时长分位 63%", tone: "watch" },
-  { label: "MA120 乖离", value: "-6.3%", percentile: 21, note: "短线仍在弱势区", tone: "watch" },
+  {
+    label: "TTM 股息率", value: "5.13%", percentile: 88, note: "高于近10年 88% 时段", tone: "good",
+    position: 54, range: ["2.82%", "7.08%"], stats: ["3.73%", "4.16%", "4.72%"],
+    bins: [12, 22, 41, 68, 91, 100, 82, 61, 44, 28, 17, 9],
+    insight: "当前股息率已越过历史上四分之三的高息区间，现金回报吸引力较强。",
+  },
+  {
+    label: "PE-TTM", value: "7.40×", percentile: 18, note: "估值处于偏低区间", tone: "good",
+    position: 17, range: ["5.65×", "14.66×"], stats: ["7.82×", "8.66×", "9.92×"],
+    bins: [9, 28, 64, 96, 100, 79, 55, 37, 23, 13, 8, 4],
+    insight: "当前 PE 低于历史中枢约 15%，处在低估值一侧，但盈利周期仍需跟踪。",
+  },
+  {
+    label: "PB", value: "0.86×", percentile: 32, note: "低于近10年 68% 时段", tone: "good",
+    position: 26, range: ["0.61×", "1.58×"], stats: ["0.82×", "0.96×", "1.16×"],
+    bins: [10, 31, 75, 100, 86, 70, 47, 30, 19, 11, 7, 3],
+    insight: "当前 PB 靠近下四分位，账面价值维度的安全边际相对充足。",
+  },
+  {
+    label: "股债收益差", value: "3.69%", percentile: 91, note: "风险补偿较充足", tone: "good",
+    position: 90, range: ["0.03%", "4.11%"], stats: ["1.23%", "1.82%", "2.63%"],
+    bins: [7, 19, 38, 73, 100, 95, 72, 53, 34, 20, 11, 5],
+    insight: "收益差接近历史极高区域，相较国债，红利资产提供了更厚的静态补偿。",
+  },
+  {
+    label: "当前回撤", value: "-14.8%", percentile: 72, note: "回撤深度分位 72%", tone: "watch",
+    position: 47, range: ["0%", "-31.6%"], stats: ["-2.5%", "-6.4%", "-12.1%"],
+    bins: [100, 81, 65, 51, 39, 31, 23, 17, 12, 8, 5, 3],
+    insight: "回撤已经深于多数历史时段，但距离极端压力区仍有空间，适合控制分批节奏。",
+  },
+  {
+    label: "回调时长", value: "54日", percentile: 63, note: "时长分位 63%", tone: "watch",
+    position: 37, range: ["0日", "146日"], stats: ["11日", "29日", "49日"],
+    bins: [100, 82, 64, 48, 35, 27, 19, 14, 10, 7, 5, 3],
+    insight: "本轮调整已超过典型回调时长，时间维度开始有利，但尚未进入极端磨底区。",
+  },
+  {
+    label: "MA120 乖离", value: "-6.3%", percentile: 21, note: "短线仍在弱势区", tone: "watch",
+    position: 39, range: ["-24.6%", "+22.8%"], stats: ["-4.8%", "+0.6%", "+5.9%"],
+    bins: [5, 10, 22, 46, 78, 100, 96, 71, 43, 24, 12, 6],
+    insight: "价格明显低于中期均线，超跌特征出现；趋势确认仍需等待乖离率向零轴收敛。",
+  },
 ];
 
 function RangeTabs({ range, onChange }: { range: RangeKey; onChange: (value: RangeKey) => void }) {
@@ -141,18 +176,52 @@ function ChartTooltip({ active, payload, label }: any) {
 }
 
 function SignalRow({ signal }: { signal: (typeof valuationSignals)[number] }) {
+  const tooltipId = `signal-${signal.label.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "")}`;
   return (
-    <div className="signal-row">
+    <div
+      className="signal-row"
+      tabIndex={0}
+      aria-describedby={tooltipId}
+      aria-label={`${signal.label}，当前 ${signal.value}，近10年 ${signal.percentile}% 分位。聚焦查看历史分布。`}
+    >
       <div className="signal-copy">
-        <span>{signal.label}</span>
+        <span>{signal.label} <CircleHelp size={11} aria-hidden="true" /></span>
         <strong>{signal.value}</strong>
       </div>
       <div className="signal-track" aria-label={`${signal.label}，10年分位 ${signal.percentile}%`}>
         <span className={signal.tone} style={{ width: `${signal.percentile}%` }} />
+        <i className="signal-current-dot" style={{ left: `${signal.percentile}%` }} />
       </div>
       <div className="signal-note">
         <span>{signal.note}</span>
         <span>{signal.percentile}% 分位</span>
+      </div>
+      <div className="signal-popover" id={tooltipId} role="tooltip">
+        <div className="popover-head">
+          <div>
+            <span>近10年历史分布</span>
+            <strong>{signal.label}</strong>
+          </div>
+          <div className="popover-current"><span>当前</span><strong>{signal.value}</strong></div>
+        </div>
+        <div className="distribution-chart" aria-label={`${signal.label}近10年历史频数分布`}>
+          <div className="distribution-bars">
+            {signal.bins.map((height, index) => (
+              <i key={index} style={{ height: `${height}%` }} className={index / signal.bins.length * 100 <= signal.position ? "passed" : ""} />
+            ))}
+          </div>
+          <div className="current-marker" style={{ left: `${signal.position}%` }}>
+            <span>当前</span><i />
+          </div>
+        </div>
+        <div className="distribution-axis"><span>{signal.range[0]}</span><span>{signal.range[1]}</span></div>
+        <div className="quartile-grid">
+          <div><span>25% 分位</span><strong>{signal.stats[0]}</strong></div>
+          <div><span>中位数</span><strong>{signal.stats[1]}</strong></div>
+          <div><span>75% 分位</span><strong>{signal.stats[2]}</strong></div>
+        </div>
+        <p className="popover-insight">{signal.insight}</p>
+        <div className="popover-foot"><span>日度观察值 · 近10年</span><strong>{signal.percentile}% 分位</strong></div>
       </div>
     </div>
   );
@@ -283,118 +352,4 @@ export default function Home() {
               <div className="yield-callout">
                 <div><span>当前股息率</span><strong>5.13%</strong></div>
                 <Minus size={17} />
-                <div><span>5年国债</span><strong>1.44%</strong></div>
-                <span className="equals">=</span>
-                <div className="spread-result"><span>收益差</span><strong>3.69%</strong></div>
-              </div>
-              <div className="chart-wrap yield-chart" aria-label="股息率、国债收益率及收益差走势图">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={chartData} margin={{ top: 12, right: 10, left: -18, bottom: 0 }}>
-                    <CartesianGrid stroke="#dfe5df" vertical={false} strokeDasharray="3 6" />
-                    <XAxis dataKey="date" tickFormatter={(value) => value.slice(0, 4)} minTickGap={52} axisLine={false} tickLine={false} tick={{ fill: "#7a847d", fontSize: 12 }} />
-                    <YAxis domain={[0, 7]} tickFormatter={(value) => `${value}%`} axisLine={false} tickLine={false} tick={{ fill: "#7a847d", fontSize: 12 }} />
-                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#9da9a1", strokeDasharray: "4 4" }} />
-                    <Legend iconType="plainline" wrapperStyle={{ fontSize: 12, color: "#4f5952", paddingTop: 8 }} />
-                    <Area type="monotone" dataKey="spread" name="股债收益差" fill="#e9dfc7" fillOpacity={0.72} stroke="#b58a37" strokeWidth={1.8} dot={false} />
-                    <Line type="monotone" dataKey="dividend" name="TTM 股息率" stroke="#c15b32" strokeWidth={2.8} dot={false} />
-                    <Line type="monotone" dataKey="bond" name="5年期国债" stroke="#274b43" strokeWidth={2.2} dot={false} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="insight-note"><Sparkles size={17} /> 当前收益差位于近10年 <strong>91% 分位</strong>，静态比较对红利资产更有利。</div>
-            </section>
-
-            <section className="holdings-section" id="holdings">
-              <div className="section-heading holdings-heading">
-                <div>
-                  <span className="section-kicker">CONSTITUENTS</span>
-                  <h2>当前核心持仓</h2>
-                  <p>前十大权重合计 25.12%，单一成分股权重较为分散</p>
-                </div>
-                <span className="date-badge"><Clock3 size={14} /> 权重截至 2026-05-29</span>
-              </div>
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr><th>排名</th><th>证券名称</th><th>代码</th><th>行业</th><th>指数权重</th></tr>
-                  </thead>
-                  <tbody>
-                    {holdings.map((holding, index) => (
-                      <tr key={holding.code}>
-                        <td><span className="rank">{String(index + 1).padStart(2, "0")}</span></td>
-                        <td><strong>{holding.name}</strong></td>
-                        <td className="code">{holding.code}</td>
-                        <td><span className="sector-tag">{holding.sector}</span></td>
-                        <td>
-                          <div className="weight-cell"><span className="weight-bar"><i style={{ width: `${(holding.weight / 2.7) * 100}%` }} /></span><strong>{holding.weight.toFixed(2)}%</strong></div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <a className="text-link" href="https://www.csindex.com.cn/#/indices/family/detail?indexCode=H30269" target="_blank" rel="noreferrer">
-                查看中证指数官方资料 <ChevronRight size={15} />
-              </a>
-            </section>
-          </div>
-
-          <aside className="advice-column" id="method">
-            <div className="advice-sticky">
-              <section className="advice-card">
-                <div className="advice-topline"><span>估值性价比</span><span className="status-dot">数据有效</span></div>
-                <div className="score-block">
-                  <div className="score-ring"><strong>78</strong><span>/ 100</span></div>
-                  <div>
-                    <span className="signal-badge">偏高性价比</span>
-                    <h2>可分批关注</h2>
-                    <p>股息率与股债收益差提供安全垫，但趋势尚未完全转强。</p>
-                  </div>
-                </div>
-
-                <div className="advice-box">
-                  <Target size={19} />
-                  <div>
-                    <strong>当前策略</strong>
-                    <p>长期配置资金可考虑分 3—5 次逐步布局；短线资金等待站回 MA120 后再提高节奏。</p>
-                  </div>
-                </div>
-
-                <div className="signal-list">
-                  <div className="signal-title"><BarChart3 size={17} /> 七项观察信号 <span>近10年口径</span></div>
-                  {valuationSignals.map((signal) => <SignalRow key={signal.label} signal={signal} />)}
-                </div>
-
-                <details className="method-details">
-                  <summary>信号如何计算 <ChevronRight size={15} /></summary>
-                  <p>综合分数由股息率、PE/PB、股债收益差、回撤深度、回调时长及均线乖离率加权生成。价值指标占 70%，技术指标占 30%。</p>
-                </details>
-              </section>
-
-              <section className="conviction-card">
-                <Leaf size={22} />
-                <span>给长期主义者的话</span>
-                <p>“时间是好生意的朋友，是平庸生意的敌人。”</p>
-                <small>把注意力留给现金流，把耐心留给时间。</small>
-              </section>
-
-              <section className="risk-note">
-                <ShieldCheck size={17} />
-                <p><strong>研究提示</strong>：该信号不是个性化投资建议。指数也会波动与回撤，请结合自身期限和风险承受能力。</p>
-              </section>
-            </div>
-          </aside>
-        </div>
-      </main>
-
-      <footer>
-        <div className="footer-brand"><Leaf size={16} /> 稳稳红利</div>
-        <p>数据口径：中证红利低波动指数（H30269）；指数与成分股数据参考中证指数，国债收益率参考中债收益率曲线。页面数据为研究快照。</p>
-        <div className="footer-links">
-          <a href="https://www.csindex.com.cn/" target="_blank" rel="noreferrer">中证指数</a>
-          <a href="https://yield.chinabond.com.cn/" target="_blank" rel="noreferrer">中国债券信息网</a>
-        </div>
-      </footer>
-    </div>
-  );
-}
+                <div><span>5年国债</span><strong>1
