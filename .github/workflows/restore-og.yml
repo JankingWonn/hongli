@@ -1,0 +1,27 @@
+name: Restore complete preview asset
+
+on:
+  push:
+    paths:
+      - ".github/workflows/restore-og.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore verified asset
+        run: |
+          curl -fL --retry 3 "https://wenwen-hongli-compass.jankingwon.chatgpt.site/og.png" -o public/og.png
+          echo "64d98bbcda134e13859f97ddc75769fac3d6685c3821b110e72be4541cd7ed82  public/og.png" | sha256sum -c -
+      - name: Commit restored asset and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm .github/workflows/restore-og.yml
+          git add public/og.png .github/workflows/restore-og.yml
+          git commit -m "Restore complete social preview image"
+          git push
