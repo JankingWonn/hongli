@@ -194,7 +194,7 @@ function SignalRow({ signal }: { signal: (typeof valuationSignals)[number] }) {
   const hasTrend = "trendScore" in signal && typeof signal.trendScore === "number";
   return (
     <div
-      className={`signal-row health-${signal.health}`}
+      className={`signal-row health-${signal.health}${hasTrend ? " dual-signal" : ""}`}
       tabIndex={0}
       aria-describedby={tooltipId}
       aria-label={`${signal.label}，当前 ${signal.value}，判读为${signal.healthLabel}，近10年 ${signal.percentile}% 分位。聚焦查看历史分布。`}
@@ -335,4 +335,4 @@ export default function Home() {
             <div className="metric-foot positive"><ArrowUpRight size={15} /> 近10年 88% 分位</div>
           </article>
           <article>
-            <div className="metric-label"><Scale size={17} /> 股债收益差</div
+            <div className="metric-label"><Scale 
