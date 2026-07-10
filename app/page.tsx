@@ -18,8 +18,10 @@ import {
   BarChart3,
   BookOpen,
   CalendarDays,
+  CheckCircle2,
   ChevronRight,
   CircleHelp,
+  CircleMinus,
   Clock3,
   ExternalLink,
   Landmark,
@@ -32,6 +34,7 @@ import {
   Sparkles,
   Target,
   TrendingUp,
+  TriangleAlert,
 } from "lucide-react";
 
 type RangeKey = "1Y" | "3Y" | "5Y";
@@ -98,43 +101,50 @@ const holdings = [
 
 const valuationSignals = [
   {
-    label: "TTM 股息率", value: "5.13%", percentile: 88, note: "高于近10年 88% 时段", tone: "good",
+    label: "TTM 股息率", value: "5.13%", percentile: 88, note: "高于近10年 88% 时段",
+    health: "favorable", healthLabel: "有利", healthScore: 88, direction: "越高越有利",
     position: 54, range: ["2.82%", "7.08%"], stats: ["3.73%", "4.16%", "4.72%"],
     bins: [12, 22, 41, 68, 91, 100, 82, 61, 44, 28, 17, 9],
     insight: "当前股息率已越过历史上四分之三的高息区间，现金回报吸引力较强。",
   },
   {
-    label: "PE-TTM", value: "7.40×", percentile: 18, note: "估值处于偏低区间", tone: "good",
+    label: "PE-TTM", value: "7.40×", percentile: 18, note: "估值处于偏低区间",
+    health: "favorable", healthLabel: "有利", healthScore: 82, direction: "越低越有利",
     position: 17, range: ["5.65×", "14.66×"], stats: ["7.82×", "8.66×", "9.92×"],
     bins: [9, 28, 64, 96, 100, 79, 55, 37, 23, 13, 8, 4],
     insight: "当前 PE 低于历史中枢约 15%，处在低估值一侧，但盈利周期仍需跟踪。",
   },
   {
-    label: "PB", value: "0.86×", percentile: 32, note: "低于近10年 68% 时段", tone: "good",
+    label: "PB", value: "0.86×", percentile: 32, note: "低于近10年 68% 时段",
+    health: "favorable", healthLabel: "偏有利", healthScore: 70, direction: "越低越有利",
     position: 26, range: ["0.61×", "1.58×"], stats: ["0.82×", "0.96×", "1.16×"],
     bins: [10, 31, 75, 100, 86, 70, 47, 30, 19, 11, 7, 3],
     insight: "当前 PB 靠近下四分位，账面价值维度的安全边际相对充足。",
   },
   {
-    label: "股债收益差", value: "3.69%", percentile: 91, note: "风险补偿较充足", tone: "good",
+    label: "股债收益差", value: "3.69%", percentile: 91, note: "风险补偿较充足",
+    health: "favorable", healthLabel: "有利", healthScore: 93, direction: "越高越有利",
     position: 90, range: ["0.03%", "4.11%"], stats: ["1.23%", "1.82%", "2.63%"],
     bins: [7, 19, 38, 73, 100, 95, 72, 53, 34, 20, 11, 5],
     insight: "收益差接近历史极高区域，相较国债，红利资产提供了更厚的静态补偿。",
   },
   {
-    label: "当前回撤", value: "-14.8%", percentile: 72, note: "回撤深度分位 72%", tone: "watch",
+    label: "当前回撤", value: "-14.8%", percentile: 72, note: "回撤深度分位 72%",
+    health: "neutral", healthLabel: "中性", healthScore: 58, direction: "适度回撤有利，过深需谨慎",
     position: 47, range: ["0%", "-31.6%"], stats: ["-2.5%", "-6.4%", "-12.1%"],
     bins: [100, 81, 65, 51, 39, 31, 23, 17, 12, 8, 5, 3],
     insight: "回撤已经深于多数历史时段，但距离极端压力区仍有空间，适合控制分批节奏。",
   },
   {
-    label: "回调时长", value: "54日", percentile: 63, note: "时长分位 63%", tone: "watch",
+    label: "回调时长", value: "54日", percentile: 63, note: "时长分位 63%",
+    health: "neutral", healthLabel: "中性", healthScore: 52, direction: "接近历史中枢更稳健",
     position: 37, range: ["0日", "146日"], stats: ["11日", "29日", "49日"],
     bins: [100, 82, 64, 48, 35, 27, 19, 14, 10, 7, 5, 3],
     insight: "本轮调整已超过典型回调时长，时间维度开始有利，但尚未进入极端磨底区。",
   },
   {
-    label: "MA120 乖离", value: "-6.3%", percentile: 21, note: "短线仍在弱势区", tone: "watch",
+    label: "MA120 乖离", value: "-6.3%", percentile: 21, note: "短线仍在弱势区",
+    health: "caution", healthLabel: "需谨慎", healthScore: 38, direction: "向 0 轴修复更有利",
     position: 39, range: ["-24.6%", "+22.8%"], stats: ["-4.8%", "+0.6%", "+5.9%"],
     bins: [5, 10, 22, 46, 78, 100, 96, 71, 43, 24, 12, 6],
     insight: "价格明显低于中期均线，超跌特征出现；趋势确认仍需等待乖离率向零轴收敛。",
@@ -177,24 +187,30 @@ function ChartTooltip({ active, payload, label }: any) {
 
 function SignalRow({ signal }: { signal: (typeof valuationSignals)[number] }) {
   const tooltipId = `signal-${signal.label.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, "")}`;
+  const HealthIcon = signal.health === "favorable" ? CheckCircle2 : signal.health === "neutral" ? CircleMinus : TriangleAlert;
   return (
     <div
-      className="signal-row"
+      className={`signal-row health-${signal.health}`}
       tabIndex={0}
       aria-describedby={tooltipId}
-      aria-label={`${signal.label}，当前 ${signal.value}，近10年 ${signal.percentile}% 分位。聚焦查看历史分布。`}
+      aria-label={`${signal.label}，当前 ${signal.value}，判读为${signal.healthLabel}，近10年 ${signal.percentile}% 分位。聚焦查看历史分布。`}
     >
       <div className="signal-copy">
         <span>{signal.label} <CircleHelp size={11} aria-hidden="true" /></span>
-        <strong>{signal.value}</strong>
+        <div className={`signal-value-wrap ${signal.health}`}>
+          <strong>{signal.value}</strong>
+          <span className={`health-badge ${signal.health}`}><HealthIcon size={10} />{signal.healthLabel}</span>
+        </div>
       </div>
-      <div className="signal-track" aria-label={`${signal.label}，10年分位 ${signal.percentile}%`}>
-        <span className={signal.tone} style={{ width: `${signal.percentile}%` }} />
-        <i className="signal-current-dot" style={{ left: `${signal.percentile}%` }} />
+      <div className="signal-track" aria-label={`${signal.label}，综合有利度 ${signal.healthScore} 分`}>
+        <span className="health-zone caution" />
+        <span className="health-zone neutral" />
+        <span className="health-zone favorable" />
+        <i className={`signal-current-dot ${signal.health}`} style={{ left: `${signal.healthScore}%` }} />
       </div>
       <div className="signal-note">
-        <span>{signal.note}</span>
-        <span>{signal.percentile}% 分位</span>
+        <span>{signal.direction}</span>
+        <strong className={signal.health}>有利度 {signal.healthScore}/100</strong>
       </div>
       <div className="signal-popover" id={tooltipId} role="tooltip">
         <div className="popover-head">
@@ -202,15 +218,19 @@ function SignalRow({ signal }: { signal: (typeof valuationSignals)[number] }) {
             <span>近10年历史分布</span>
             <strong>{signal.label}</strong>
           </div>
-          <div className="popover-current"><span>当前</span><strong>{signal.value}</strong></div>
+          <div className={`popover-current ${signal.health}`}>
+            <span>当前</span>
+            <div><strong>{signal.value}</strong><span className={`health-badge ${signal.health}`}><HealthIcon size={10} />{signal.healthLabel}</span></div>
+          </div>
         </div>
+        <div className="direction-rule"><span>判读规则</span><strong>{signal.direction}</strong></div>
         <div className="distribution-chart" aria-label={`${signal.label}近10年历史频数分布`}>
           <div className="distribution-bars">
             {signal.bins.map((height, index) => (
               <i key={index} style={{ height: `${height}%` }} className={index / signal.bins.length * 100 <= signal.position ? "passed" : ""} />
             ))}
           </div>
-          <div className="current-marker" style={{ left: `${signal.position}%` }}>
+          <div className={`current-marker ${signal.health}`} style={{ left: `${signal.position}%` }}>
             <span>当前</span><i />
           </div>
         </div>
@@ -220,8 +240,8 @@ function SignalRow({ signal }: { signal: (typeof valuationSignals)[number] }) {
           <div><span>中位数</span><strong>{signal.stats[1]}</strong></div>
           <div><span>75% 分位</span><strong>{signal.stats[2]}</strong></div>
         </div>
-        <p className="popover-insight">{signal.insight}</p>
-        <div className="popover-foot"><span>日度观察值 · 近10年</span><strong>{signal.percentile}% 分位</strong></div>
+        <div className={`popover-insight ${signal.health}`}><HealthIcon size={14} /><p>{signal.insight}</p></div>
+        <div className="popover-foot"><span>日度观察值 · 近10年</span><strong>原始分位 {signal.percentile}%</strong></div>
       </div>
     </div>
   );
@@ -325,31 +345,4 @@ export default function Home() {
                     <XAxis dataKey="date" tickFormatter={(value) => value.slice(0, 4)} minTickGap={52} axisLine={false} tickLine={false} tick={{ fill: "#7a847d", fontSize: 12 }} />
                     <YAxis domain={["dataMin - 6", "dataMax + 5"]} axisLine={false} tickLine={false} tick={{ fill: "#7a847d", fontSize: 12 }} />
                     <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#9da9a1", strokeDasharray: "4 4" }} />
-                    <Line type="monotone" dataKey="lowVol" name="红利低波" stroke="#c15b32" strokeWidth={3} dot={false} activeDot={{ r: 4, fill: "#c15b32", stroke: "#fff", strokeWidth: 2 }} />
-                    <Line type="monotone" dataKey="shanghai" name="上证指数" stroke="#274b43" strokeWidth={2.2} dot={false} activeDot={{ r: 4, fill: "#274b43", stroke: "#fff", strokeWidth: 2 }} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="chart-caption"><CircleHelp size={14} /> 走势为月度观察值，用于展示相对表现；历史收益不预示未来表现。</div>
-            </section>
-
-            <aside className="quote-band">
-              <div className="quote-glyph">“</div>
-              <p>短期市场是一台投票机，长期则是一台称重机。</p>
-              <span>— 本杰明·格雷厄姆</span>
-              <div className="quote-line" />
-            </aside>
-
-            <section className="data-panel" id="valuation">
-              <div className="section-heading">
-                <div>
-                  <span className="section-kicker">DIVIDEND YIELD</span>
-                  <h2>股息率与无风险收益率</h2>
-                  <p>收益差越宽，权益资产相对国债的静态风险补偿越充足</p>
-                </div>
-                <RangeTabs range={range} onChange={setRange} />
-              </div>
-              <div className="yield-callout">
-                <div><span>当前股息率</span><strong>5.13%</strong></div>
-                <Minus size={17} />
-                <div><span>5年国债</span><strong>1
+                    <Line type="monotone" dataKey="lowVol" name="红利低波" stroke="#c15b32" strokeWidth={3} dot={false} activeDot={{ r: 4, fil
