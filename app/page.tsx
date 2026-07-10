@@ -102,35 +102,35 @@ const holdings = [
 const valuationSignals = [
   {
     label: "TTM 股息率", value: "5.13%", percentile: 88, note: "高于近10年 88% 时段",
-    health: "favorable", healthLabel: "吸引力高", healthScore: 88, scoreLabel: "收益吸引力", direction: "股息率越高，静态现金回报越有利", percentileLabel: "股息率历史分位 88%",
+    health: "favorable", healthLabel: "吸引力高", healthScore: 88, scoreLabel: "收益吸引力", shortScoreLabel: "吸引力", direction: "股息率越高，静态现金回报越有利", percentileLabel: "股息率历史分位 88%",
     position: 54, range: ["2.82%", "7.08%"], stats: ["3.73%", "4.16%", "4.72%"],
     bins: [12, 22, 41, 68, 91, 100, 82, 61, 44, 28, 17, 9],
     insight: "当前股息率已越过历史上四分之三的高息区间，现金回报吸引力较强。",
   },
   {
     label: "PE-TTM", value: "7.40×", percentile: 18, note: "估值处于偏低区间",
-    health: "favorable", healthLabel: "低估", healthScore: 82, scoreLabel: "低估程度", direction: "PE 越低，估值安全边际越高", percentileLabel: "PE 历史分位 18%",
+    health: "favorable", healthLabel: "低估", healthScore: 82, scoreLabel: "低估程度", shortScoreLabel: "低估", direction: "PE 越低，估值安全边际越高", percentileLabel: "PE 历史分位 18%",
     position: 17, range: ["5.65×", "14.66×"], stats: ["7.82×", "8.66×", "9.92×"],
     bins: [9, 28, 64, 96, 100, 79, 55, 37, 23, 13, 8, 4],
     insight: "当前 PE 低于历史中枢约 15%，处在低估值一侧，但盈利周期仍需跟踪。",
   },
   {
     label: "PB", value: "0.86×", percentile: 32, note: "低于近10年 68% 时段",
-    health: "favorable", healthLabel: "偏低估", healthScore: 70, scoreLabel: "低估程度", direction: "PB 越低，账面价值安全边际越高", percentileLabel: "PB 历史分位 32%",
+    health: "favorable", healthLabel: "偏低估", healthScore: 70, scoreLabel: "低估程度", shortScoreLabel: "低估", direction: "PB 越低，账面价值安全边际越高", percentileLabel: "PB 历史分位 32%",
     position: 26, range: ["0.61×", "1.58×"], stats: ["0.82×", "0.96×", "1.16×"],
     bins: [10, 31, 75, 100, 86, 70, 47, 30, 19, 11, 7, 3],
     insight: "当前 PB 靠近下四分位，账面价值维度的安全边际相对充足。",
   },
   {
     label: "股债收益差", value: "3.69%", percentile: 91, note: "风险补偿较充足",
-    health: "favorable", healthLabel: "吸引力高", healthScore: 93, scoreLabel: "股债吸引力", direction: "收益差越高，相对国债的风险补偿越充足", percentileLabel: "收益差历史分位 91%",
+    health: "favorable", healthLabel: "吸引力高", healthScore: 93, scoreLabel: "股债吸引力", shortScoreLabel: "股债", direction: "收益差越高，相对国债的风险补偿越充足", percentileLabel: "收益差历史分位 91%",
     position: 90, range: ["0.03%", "4.11%"], stats: ["1.23%", "1.82%", "2.63%"],
     bins: [7, 19, 38, 73, 100, 95, 72, 53, 34, 20, 11, 5],
     insight: "收益差接近历史极高区域，相较国债，红利资产提供了更厚的静态补偿。",
   },
   {
     label: "当前回撤", value: "-14.8%", percentile: 72, note: "回撤深度分位 72%",
-    health: "favorable", healthLabel: "机会偏高", healthScore: 72, scoreLabel: "逆向机会", direction: "按回撤绝对值判断：越深通常越便宜，但风险同步上升", percentileLabel: "回撤深度历史分位 72%", trendScore: 38, trendLabel: "趋势偏弱",
+    health: "favorable", healthLabel: "机会偏高", healthScore: 72, scoreLabel: "逆向机会", shortScoreLabel: "机会", direction: "按回撤绝对值判断：越深通常越便宜，但风险同步上升", percentileLabel: "回撤深度历史分位 72%", trendScore: 38, trendLabel: "趋势偏弱",
     position: 47, range: ["0%", "-31.6%"], stats: ["-2.5%", "-6.4%", "-12.1%"],
     bins: [100, 81, 65, 51, 39, 31, 23, 17, 12, 8, 5, 3],
     insight: "回撤已经深于多数历史时段，折价和潜在修复空间随之增加。",
@@ -138,7 +138,7 @@ const valuationSignals = [
   },
   {
     label: "回调时长", value: "54日", percentile: 63, note: "时长分位 63%",
-    health: "neutral", healthLabel: "出清较充分", healthScore: 63, scoreLabel: "时间出清度", direction: "回调越久，筹码出清通常越充分，但不会自动触发反转", percentileLabel: "回调时长历史分位 63%", trendScore: 42, trendLabel: "企稳待确认",
+    health: "neutral", healthLabel: "出清较充分", healthScore: 63, scoreLabel: "时间出清度", shortScoreLabel: "出清", direction: "回调越久，筹码出清通常越充分，但不会自动触发反转", percentileLabel: "回调时长历史分位 63%", trendScore: 42, trendLabel: "企稳待确认",
     position: 37, range: ["0日", "146日"], stats: ["11日", "29日", "49日"],
     bins: [100, 82, 64, 48, 35, 27, 19, 14, 10, 7, 5, 3],
     insight: "本轮调整已超过典型回调时长，情绪和筹码的时间出清较为充分。",
@@ -146,7 +146,7 @@ const valuationSignals = [
   },
   {
     label: "MA120 乖离", value: "-6.3%", percentile: 21, note: "短线仍在弱势区",
-    health: "favorable", healthLabel: "超跌机会", healthScore: 79, scoreLabel: "向上回归机会", direction: "负乖离绝对值越大，向上回归空间越高；正乖离则相反", percentileLabel: "有符号乖离率历史分位 21%", trendScore: 38, trendLabel: "趋势偏弱",
+    health: "favorable", healthLabel: "超跌机会", healthScore: 79, scoreLabel: "向上回归机会", shortScoreLabel: "回归", direction: "负乖离绝对值越大，向上回归空间越高；正乖离则相反", percentileLabel: "有符号乖离率历史分位 21%", trendScore: 38, trendLabel: "趋势偏弱",
     position: 39, range: ["-24.6%", "+22.8%"], stats: ["-4.8%", "+0.6%", "+5.9%"],
     bins: [5, 10, 22, 46, 78, 100, 96, 71, 43, 24, 12, 6],
     insight: "当前为负乖离，且处在历史偏低区域，向上均值回归的潜在空间增加。",
@@ -204,22 +204,20 @@ function SignalRow({ signal }: { signal: (typeof valuationSignals)[number] }) {
         <strong className="raw-signal-value">{signal.value}</strong>
       </div>
       <div className="raw-reading">
-        <span>{signal.percentileLabel}</span>
-        <span>{signal.direction}</span>
+        <span>历史分位 P{signal.percentile}</span>
+        <span className="hover-cue">悬停详情 <CircleHelp size={9} /></span>
       </div>
       <div className={hasTrend ? "dimension-readings dual" : "dimension-readings"}>
         <div className="dimension-reading opportunity">
-          <span><HealthIcon size={10} />{signal.scoreLabel}</span>
+          <span><HealthIcon size={10} />{signal.shortScoreLabel}</span>
           <i><b style={{ width: `${signal.healthScore}%` }} /></i>
           <strong>{signal.healthScore}</strong>
-          <em>{signal.healthLabel}</em>
         </div>
         {hasTrend && (
           <div className="dimension-reading trend">
-            <span><TriangleAlert size={10} />趋势确认</span>
+            <span><TriangleAlert size={10} />趋势</span>
             <i><b style={{ width: `${signal.trendScore}%` }} /></i>
             <strong>{signal.trendScore}</strong>
-            <em>{signal.trendLabel}</em>
           </div>
         )}
       </div>
@@ -332,7 +330,4 @@ export default function Home() {
           <article>
             <div className="metric-label"><Leaf size={17} /> 当前 TTM 股息率 <CircleHelp size={14} title="过去12个月成分股现金分红与指数市值之比" /></div>
             <div className="metric-value positive">5.13<span>%</span></div>
-            <div className="metric-foot positive"><ArrowUpRight size={15} /> 近10年 88% 分位</div>
-          </article>
-          <article>
-            <div className="metric-label"><Scale 
+            <div className="metric
